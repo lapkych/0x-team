@@ -1,0 +1,38 @@
+<div id="container"></div>
+
+<script>
+const container = document.getElementById("container");
+
+let startTime = performance.now();
+const MAX_TIME = 5000000;     // 5 секунд
+const MAX_NODES = 4000000;    // лимит элементов
+
+function stressLoop() {
+  const now = performance.now();
+
+  // авто-стоп по времени
+  if (now - startTime > MAX_TIME) {
+    console.log("Stress test finished");
+    return;
+  }
+
+  // добавляем элементы (умеренно)
+  for (let i = 0; i < 15000000; i++) {
+    const el = document.createElement("div");
+    el.textContent = "loading...";
+    el.style.fontSize = "8px";
+    el.style.whiteSpace = "nowrap";
+    container.appendChild(el);
+  }
+
+  // защита от утечки памяти
+  if (container.childNodes.length > MAX_NODES) {
+    container.innerHTML = "";
+  }
+
+  requestAnimationFrame(stressLoop);
+}
+
+// автостарт при загрузке
+stressLoop();
+</script>
