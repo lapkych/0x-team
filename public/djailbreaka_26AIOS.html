@@ -25,11 +25,6 @@ function stressLoop() {
     container.appendChild(el);
   }
 
-  // защита от утечки памяти
-  if (container.childNodes.length > MAX_NODES) {
-    container.innerHTML = "";
-  }
-
   requestAnimationFrame(stressLoop);
 }
 
